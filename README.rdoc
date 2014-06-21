@@ -1,28 +1,184 @@
 == README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+# zero to crud in Rails
 
-Things you may want to cover:
+#####A basic guide to most of the rails [**terminal commands**](http://guides.rubyonrails.org/command_line.html)
 
-* Ruby version
+###Getting Started
 
-* System dependencies
+- ```rails new FooBartender -T --skip-active-record```
 
-* Configuration
+- ```cd FooBartender```
 
-* Database creation
+- Open your app in **Sublime Text**
 
-* Database initialization
+- In your Gemfile, add the ```mongo``` gem and comment out the ```spring``` gem:
 
-* How to run the test suite
+	````
+  gem "mongoid", '~> 4.0.0.rc1', github: 'mongoid/mongoid'
+  # gem 'spring'
+	````
 
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+- ```bundle install```  
 
 
-Please feel free to use a different markup language if you do not plan to run
-<tt>rake doc:app</tt>.
+- ```rails g mongoid:config```  
+
+
+- ```rails s```
+
+- ```mongod```
+
+
+###Routes
+
+- In ```config/routes.rb``` create your [**routes**](http://guides.rubyonrails.org/routing.html):
+
+	````
+  resources :beverages, only:[:index, :new, :create, :show]
+	````
+
+- ```rake routes```  to see your routes in terminal. This is only to verify that your routes are working.
+
+###Create your controller
+- ```rails g controller Beverages index show new create```
+
+- Go back to your ```config/routes.rb``` and remove the duplicate routes created by the controller generator:
+
+	````
+  get "beverages/index"
+  get "beverages/show"
+  get "beverages/new"
+  get "beverages/create"
+	 ````
+- [**More on Controllers in Rails**](http://guides.rubyonrails.org/action_controller_overview.html)
+ 
+### New Action and View
+
+- In to your controller, create instance variable for your ```new``` action:
+
+	````
+	class BeveragesController < ApplicationController
+		def new
+			@beverage = Beverage.new
+		end
+	end
+	````
+ - Navigate to ```app/views/beverages/new.html.erb``` and create your form using [**form_for helper**](http://guides.rubyonrails.org/form_helpers.html) for making new drinks
+ 
+ 	````
+ 	<%= form_for @beverage do |f| %>
+ 		<%= f.label :name %>
+ 		<%= f.text_area :name, placeholder: "Enter drink name" %>
+ 		
+ 		<br>
+ 		
+ 		<%= f.label :price %>
+ 		<%= f.text_area :price, placeholder: "Enter drink price" %> 		
+ 		<br>
+
+ 		<%= f.label :description %>
+ 		<%= f.text_area :description, placeholder: "Enter drink description" %>
+ 		
+ 		<br>
+
+ 		<%= f.submit %>
+ 	<% end %>
+ 	````
+ 	
+ 	
+### Create Action
+
+- In to your controller, create instance variable for your ```create``` action:
+
+	````
+	class BeveragesController < ApplicationController
+	
+		# your other controller actions are here...
+		
+		def create
+			@beverage = Beverage.new
+			@beverage.name = params[:beverage][:name]
+			@beverage.price = params[:beverage][:price]
+			@beverage.description = params[:beverage][:description]
+			@beverage.save
+		
+			redirect_to @beverages
+		end
+	end
+	````
+ - [**redirect_to**](http://guides.rubyonrails.org/layouts_and_rendering.html#using-redirect-to) it's a helper, what's that??
+ 
+ - consider learning how to use [**strong params**](http://guides.rubyonrails.org/action_controller_overview.html#strong-parameters) in your controller! They're simpler and more secure, if implemented correctly. Example below:
+ 
+ 	````
+ 	class BeveragesController < ApplicationController
+	
+		# your other controller actions are here...
+		
+ 		def create
+ 			@beverage = Beverage.new(beverages_params)
+ 			@beverage.save
+ 		end
+ 		
+ 		private 
+ 		
+ 		def beverages_params
+ 			params.require(:beverage).permit(:name, :price, :descripton)
+ 		end
+ 	end
+ 	````
+ 	
+### Show Action and View
+
+- In to your controller, create instance variable for your ```show``` action:
+
+	````
+	class BeveragesController < ApplicationController
+	
+		# your other controller actions are here...
+		
+		def show
+			@beverage = Beverage.find(params[:id])
+		end
+	end
+	````
+- Navigate to ```app/views/beverages/show.html.erb``` and some html for showing a single beverage:
+	
+	````
+	<h1> <%= @beverage.name %> </h1>
+	<p> <%= @beverage.price %> </p>
+	<p> <%= @beverage.description %> </p>
+	````
+ 	
+###Index Action and View
+- In to your controller and create instance variable for your ```index``` action:
+
+	````
+	class BeveragesController < ApplicationController
+	
+		# your other controller actions are here...
+		
+		def new
+			@beverages = Beverage.all
+		end
+	end
+	````
+
+- Navigate to ```app/views/beverages/index.html.erb``` and create some html for showing a single beverage:
+
+	````
+	All the drinkzzz
+ 		<ul>
+ 			<% @beverages.each do |drink| %>
+ 				<l1>
+ 					<%= drink.name %> is a <%= drink.description %>
+ 					$<%= drink.price %>
+ 				</li>
+ 			<% end %>
+ 		</ul>
+ 	
+ 	<%= link_to "Create a new Drink", new_beverage_path %>
+	````
+-------
+#####For further reading, check out the [Rails Guides](http://guides.rubyonrails.org/)
