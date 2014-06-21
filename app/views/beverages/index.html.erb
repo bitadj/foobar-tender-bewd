@@ -1,0 +1,10 @@
+<h1>All the drinkzz!</h1>
+<ul>
+  <% @beverages.each do |drink| %>
+    <li>
+      <%= drink.name %> is a <%= drink.description %> for $<%= drink.price %>!
+    </li>
+  <% end %>
+</ul>
+
+<%= link_to  "Create a new drink", new_beverage_path %>
